@@ -145,7 +145,4 @@
 		<!-- 随后还需要定义有一个会话管理器的程序类的引用 -->
 		<property name="sessionManager" ref="sessionManager" />
 	</bean>
-
-
-
 </beans>

@@ -39,6 +39,7 @@
 			</props>
 		</property>
 	</bean>
+	<!-- 资源文件读取 -->
 	<bean id="messageSource"
 		class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
@@ -49,6 +50,7 @@
 			</array>
 		</property>
 	</bean>
+	<!-- 访问路径前缀后缀配置 -->
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<!-- 匹配前缀 -->
