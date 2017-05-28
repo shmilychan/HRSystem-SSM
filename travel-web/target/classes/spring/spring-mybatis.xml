@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${db.driver}" />	<!-- 驱动程序 -->
+		<property name="jdbcUrl" value="${db.url}" /><!-- 连接地址 -->
+		<property name="user" value="${db.user}" />	<!-- 用户名 -->
+		<property name="password" value="${db.password}" />	<!-- 密码 -->
+		<property name="maxPoolSize" value="${pool.max}" />	<!-- 最大的可用连接数 -->
+		<property name="minPoolSize" value="${pool.min}" />	<!-- 最小维持的连接数 -->
+		<property name="initialPoolSize" value="${pool.init}" />	<!-- 初始化连接数 -->
+		<property name="maxIdleTime" value="${pool.idle}" />	<!-- 最大等待连接 -->
+	</bean>  
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 定义Spring与MyBatis整合的操作控制，此时数据库的连接对象取得由Spring负责 -->
+	<bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 配置所有资源文件的保存路径的资源匹配符 -->
+		<property name="mapperLocations" value="classpath:cn/mldn/travel/vo/mapping/*.xml" />
+		<property name="configLocation" value="classpath:mybatis/mybatis.cfg.xml" />
+	</bean>
+	<!-- 配置自动创建数据层实现类的开发包 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 定义该包中的访问为自动配置实现 -->
+		<property name="basePackage" value="cn.mldn.travel.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sessionFactory" />
+	</bean>
+</beans>

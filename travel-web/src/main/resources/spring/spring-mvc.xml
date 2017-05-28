@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	<context:annotation-config />
+	<context:component-scan base-package="cn.mldn.travel" />
+	<!-- 配置项目之中所需要使用的拦截器程序类 -->
+	<mvc:interceptors>		<!-- 此处可以配置多个拦截器 -->
+		<mvc:interceptor>	<!-- 配置一个拦截器 -->
+			<mvc:mapping path="/pages/**/*.action"/>
+			<bean class="cn.mldn.util.web.interceptor.ValidationInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<mvc:annotation-driven />			<!-- 启动Spring MVC的注解配置 -->
+	<mvc:default-servlet-handler />		<!-- 启用处理请求的servlet -->
+	<!-- 定义文件的上传配置支持 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置每次上传文件的最大限制 -->
+		<property name="maxUploadSize" value="5242880" />
+		<!-- 设置每次上传占用的内存大小 -->
+		<property name="maxInMemorySize" value="4096" />
+	</bean>
+	<!-- 配置了一个全局的异常的跳转映射，只要出现了指定的错误信息，那么就跳转到指定的页面 -->
+	<bean id="exceptionMapping"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop
+					key="org.springframework.web.multipart.MaxUploadSizeExceededException">
+					errors
+				</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<array>
+				<value>cn.mldn.message.Messages</value>
+				<value>cn.mldn.message.Pages</value>
+				<value>cn.mldn.message.Validations</value>
+			</array>
+		</property>
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 匹配前缀 -->
+		<property name="prefix" value="/WEB-INF/pages/" />
+		<!-- 匹配处理的后缀 -->
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!-- 启动在Shiro里面进行Annotation的相关验证处理操作 -->
+	<bean id="controllerDefaultAdvisorAutoProxyCreator"
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor">
+		<!-- 进行目标程序类的代理控制 -->
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+	<!-- 针对于安全管理实现的AOP处理操作 -->
+	<bean id="controllerAuthorizationAttributeSourceAdvisor"
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager"/>
+	</bean>
+	<!-- 定义静态资源映射 -->
+	<mvc:resources location="/WEB-INF/js/" mapping="/js/**"/>
+	<mvc:resources location="/WEB-INF/css/" mapping="/css/**"/>
+	<mvc:resources location="/WEB-INF/dist/" mapping="/dist/**"/>
+	<mvc:resources location="/WEB-INF/images/" mapping="/images/**"/>
+	<mvc:resources location="/WEB-INF/bootstrap/" mapping="/bootstrap/**"/>
+	<mvc:resources location="/WEB-INF/jquery/" mapping="/jquery/**"/>
+	<mvc:resources location="/WEB-INF/upload/" mapping="/upload/**"/>
+</beans>

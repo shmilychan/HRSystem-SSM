@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mldn.travel.dao.IEmpDAO">
+
+	<select id="findAllByIds2" resultType="Emp">
+		SELECT eid,ename,did FROM emp 
+		<where>
+			eid IN 
+			<foreach collection="array" open="(" close=")" separator="," item="myeid">
+				#{myeid}
+			</foreach>
+		</where>
+	</select>	
+	
+
+	<select id="findTravelById" parameterType="map" resultType="Emp">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp
+		WHERE eid NOT IN (
+			SELECT eid 
+			FROM travel_emp
+			WHERE tid IN (
+				SELECT tid 
+				FROM travel 
+				WHERE ((sdate &gt;= #{sdate} AND sdate &lt;= #{edate})
+					OR (edate &gt;= #{sdate} AND edate &lt;= #{edate})) OR (
+					sdate &lt; #{sdate} AND edate &gt; #{edate})
+			)
+		) AND eid=#{eid}
+	</select>
+
+	<select id="findAllByTravel" parameterType="long" resultType="Emp">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp
+		WHERE eid IN (
+			SELECT eid FROM travel_emp WHERE tid=#{tid})
+	</select>
+
+	<select id="findAllByDept" resultType="Emp" parameterType="map">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp
+		<where>
+			locked!=2 AND did=#{did}
+			AND eid NOT IN (
+				SELECT eid 
+				FROM travel_emp
+				WHERE tid IN (
+					SELECT tid 
+					FROM travel 
+					WHERE ((sdate &gt;= #{sdate} AND sdate &lt;= #{edate})
+					OR (edate &gt;= #{sdate} AND edate &lt;= #{edate})) OR (
+					sdate &lt; #{sdate} AND edate &gt; #{edate})
+				)
+			)
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+		ORDER BY hiredate DESC ,did
+		LIMIT #{start},#{lineSize}
+	</select>
+	
+	<select id="getAllCountByDept" resultType="long" parameterType="map">
+		SELECT COUNT(*) FROM emp 
+		<where>
+			locked!=2 AND did=#{did}
+			AND eid NOT IN (
+				SELECT eid 
+				FROM travel_emp
+				WHERE tid IN (
+					SELECT tid 
+					FROM travel 
+					WHERE ((sdate &gt;= #{sdate} AND sdate &lt;= #{edate})
+					OR (edate &gt;= #{sdate} AND edate &lt;= #{edate})) OR (
+					sdate &lt; #{sdate} AND edate &gt; #{edate})
+				)
+			)
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+	</select>
+
+	<select id="findByTravel" parameterType="long" resultType="Emp">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp
+		WHERE eid=(
+			SELECT seid FROM travel WHERE tid=#{tid})
+	</select>
+	
+	<update id="doUpdateLocked" parameterType="Emp">
+		UPDATE emp SET locked=#{locked},ineid=#{ineid} WHERE eid=#{eid}
+	</update>
+	
+	<select id="findAllByIds" resultType="Emp">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp
+		<where>
+			eid IN 
+			<foreach collection="array" open="(" close=")" separator="," item="myeid">
+				#{myeid}
+			</foreach>
+			AND locked!=2 ;
+		</where>
+	</select>
+	
+	<update id="doUpdate" parameterType="Emp">
+		UPDATE emp SET lid=#{lid},did=#{did},ename=#{ename},sal=#{sal},phone=#{phone},note=#{note},ineid=#{ineid}
+		<if test="password != null">
+			,password=#{password}
+		</if>
+		<where>
+			eid=#{eid}
+		</where>
+	</update> 
+	
+	<select id="getAllCount" resultType="long" parameterType="map">
+		SELECT COUNT(*) FROM emp 
+		<where>
+			locked!=2
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllSplit" resultType="Emp" parameterType="map">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp
+		<where>
+			locked!=2
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+		ORDER BY hiredate DESC ,did
+		LIMIT #{start},#{lineSize}
+	</select>
+
+	<insert id="doCreate" parameterType="Emp">
+		INSERT INTO emp (eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid) 
+		VALUES (#{eid},#{lid},#{did},#{ename},#{sal},#{phone},#{password},#{photo},#{note},#{hiredate},#{ineid}) ;
+	</insert>
+
+	<select id="findById" parameterType="string" resultType="Emp">
+		SELECT eid,lid,did,ename,sal,phone,password,photo,note,hiredate,ineid,locked
+		FROM emp WHERE eid=#{eid} AND locked!=2	
+	</select>
+	<select id="findAllManager" resultType="Emp">
+		SELECT eid,did,ename
+		FROM emp WHERE eid IN (
+			SELECT eid FROM dept) AND locked!=2 ;
+	</select>
+	<update id="doUpdateLevel" parameterType="Emp">
+		UPDATE emp SET lid=#{lid},ineid=#{ineid} WHERE eid=#{eid}
+	</update> 
+</mapper>

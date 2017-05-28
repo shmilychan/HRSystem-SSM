@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mldn.travel.dao.IActionDAO">
+	<!-- 根据用户编号查询出该用户所在部门对应的所有权限信息 -->
+	<select id="findAllIdByEmp" parameterType="string" resultType="string">
+		SELECT actid FROM action WHERE rid IN (
+			SELECT rid FROM dept_role WHERE did=(
+				SELECT did FROM emp WHERE eid=#{eid})) ;
+	</select>
+</mapper>

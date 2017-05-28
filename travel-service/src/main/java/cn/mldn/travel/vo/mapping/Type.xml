@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mldn.travel.dao.ITypeDAO">
+	<select id="findById" resultType="Type" parameterType="long">
+		SELECT tpid,title FROM type WHERE tpid=#{tpid};
+	</select>
+	<select id="findAll" resultType="Type">
+		SELECT tpid,title FROM type ;
+	</select>
+</mapper>

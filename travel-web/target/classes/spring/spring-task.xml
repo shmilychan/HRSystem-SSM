@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	<!-- 启用SpringTask配置注解项 -->
+	<task:annotation-driven/>
+	<!-- 定义程序的扫描包 -->
+	<context:component-scan base-package="cn.mldn"/>
+	<!-- 定义一个任务调度池，一共可以共同运行20个线程的任务 -->
+	<task:scheduler id="schedulerPool" pool-size="20"/>
+</beans>

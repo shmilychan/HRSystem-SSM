@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mldn.travel.dao.ITravelDAO">
+
+	<update id="doUpdateAuditTask" parameterType="date">
+		UPDATE travel SET audit=3
+		WHERE audit=1 AND edate&lt;#{date}
+	</update>
+
+	<select id="getAllCountByEmp" parameterType="map" resultType="long">
+		SELECT COUNT(*) FROM travel
+		<where>
+			(audit=1 OR audit=3) AND tid IN (
+				SELECT tid FROM travel_emp WHERE eid=#{eid})
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllByEmp" parameterType="map" resultType="Travel">
+		SELECT tid,seid,aeid,iid,title,sdate,edate,subdate,dest,audit,note,auddate,anote,ecount,total
+		FROM travel
+		<where>
+			(audit=1 OR audit=3) AND tid IN (
+				SELECT tid FROM travel_emp WHERE eid=#{eid})
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+		ORDER BY subdate DESC
+		LIMIT #{start},#{lineSize}
+	</select>
+ 
+	<select id="getAllCountPass" parameterType="map" resultType="long">
+		SELECT COUNT(*) FROM travel
+		<where>
+			audit=1 OR audit=3
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllPass" parameterType="map" resultType="Travel">
+		SELECT tid,seid,aeid,iid,title,sdate,edate,subdate,dest,audit,note,auddate,anote,ecount,total
+		FROM travel
+		<where>
+			audit=1 OR audit=3
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+		ORDER BY subdate DESC
+		LIMIT #{start},#{lineSize}
+	</select>
+
+
+
+	<update id="doUpdateAudit" parameterType="Travel">
+		UPDATE travel SET aeid=#{aeid},auddate=#{auddate},anote=#{anote},audit=#{audit}
+		WHERE tid=#{tid} AND audit=0
+	</update>
+
+	<select id="getAllCountByAudit" parameterType="map" resultType="long">
+		SELECT COUNT(*) FROM travel
+		<where>
+			audit=#{audit}
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findAllByAudit" parameterType="map" resultType="Travel">
+		SELECT tid,seid,aeid,iid,title,sdate,edate,subdate,dest,audit,note,auddate,anote,ecount,total
+		FROM travel
+		<where>
+			audit=#{audit}
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+		ORDER BY subdate DESC
+		LIMIT #{start},#{lineSize}
+	</select>
+
+	<select id="getTravelEmpCount" parameterType="long" resultType="int">
+		SELECT COUNT(*) FROM travel_emp WHERE tid=#{tid}
+	</select>
+
+	<update id="doUpdateSubmit" parameterType="Travel">
+		UPDATE travel SET subdate=#{subdate},audit=#{audit},ecount=#{ecount},total=#{total}
+		WHERE tid=#{tid} AND audit=9 OR audit=2 ;
+	</update>
+
+	<select id="findTravelByCost" parameterType="long" resultType="Travel">
+		SELECT tid,seid,iid,title,sdate,edate,dest,audit,note,ecount,total,subdate,auddate,anote,aeid
+		FROM travel 
+		WHERE tid=(
+			SELECT tid FROM travel_cost WHERE tcid=#{tcid})
+	</select>
+
+	<delete id="doRemoveTraveCost" parameterType="long">
+		DELETE FROM travel_cost WHERE tcid=#{tcid} 
+	</delete>
+	
+	
+	<select id="findAllTravelCost" parameterType="long" resultType="TravelCost">
+		SELECT tcid,tpid,tid,price,title
+		FROM travel_cost
+		WHERE tid=#{tid} 
+	</select>
+
+	<insert id="doCreateTravelCost" parameterType="TravelCost" useGeneratedKeys="true" keyProperty="tcid">
+		INSERT INTO travel_cost (tpid,tid,price,title) VALUES (#{tpid},#{tid},#{price},#{title}) ;
+	</insert>
+
+	<delete id="doRemoveTravelEmp" parameterType="TravelEmp">
+		DELETE FROM travel_emp WHERE tid=#{tid} AND eid=#{eid}
+	</delete>
+	
+	<insert id="doCreateTravelEmp" parameterType="TravelEmp">
+		INSERT INTO travel_emp(tid,eid) VALUES (#{tid},#{eid}) ;
+	</insert>
+	
+	<delete id="doRemoveSelf" parameterType="Travel">
+		DELETE FROM travel WHERE tid=#{tid} AND seid=#{seid} AND (audit=9 OR audit=2)
+	</delete>
+
+	<select id="findById" parameterType="long" resultType="Travel">
+		SELECT tid,seid,aeid,iid,title,sdate,edate,subdate,dest,audit,note,auddate,anote,ecount,total
+		FROM travel WHERE tid=#{tid}
+	</select>
+	
+	<update id="doUpdate" parameterType="Travel">
+		UPDATE travel SET title=#{title},iid=#{iid},sdate=#{sdate},edate=#{edate},dest=#{dest},note=#{note}
+		WHERE tid=#{tid} AND seid=#{seid} AND audit=9 OR audit=2
+	</update>
+
+	<select id="findAllSplit" parameterType="map" resultType="Travel">
+		SELECT tid,seid,iid,title,sdate,edate,dest,audit,note,ecount,total,subdate
+		FROM travel
+		<where>
+			seid=#{seid}
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+		ORDER BY subdate DESC
+		LIMIT #{start},#{lineSize}
+	</select> 
+	<select id="getAllCount" parameterType="map" resultType="long">
+		SELECT COUNT(*) FROM travel
+		<where>
+			seid=#{seid}
+			<if test="column != null and keyWord != null">
+				AND ${column} LIKE #{keyWord}
+			</if>
+		</where>
+	</select>
+
+	<insert id="doCreate" parameterType="Travel">
+		INSERT INTO travel(seid,iid,title,sdate,edate,dest,audit,note) 
+		VALUES (#{seid},#{iid},#{title},#{sdate},#{edate},#{dest},#{audit},#{note}) ;
+	</insert>
+</mapper>
